@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+
+  <node name="pepper_hand_pose" pkg="pepper_hand_pose" type="pepper_hand_pose_node" output="screen">
+    <param name="numPoints" value="4" />
+    <param name="createTargetModel" value="true" />
+  </node>
+
+
+</launch>
