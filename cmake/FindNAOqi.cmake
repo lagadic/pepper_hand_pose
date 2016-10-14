@@ -37,7 +37,56 @@
 # Users can set NAOqi_DIR to force CMake to look in a particular location,
 # setting the AL_DIR environment variable will have a similar effect.
 
+macro(vp_create_list_from_string STR LST)
+  if(NOT ${STR} STREQUAL "")
+    set(__lst ${STR})
+    string(REPLACE " " ";" __lst ${__lst})
+    list(REMOVE_ITEM __lst "")
+    set(${LST} ${__lst})
+  endif()
+endmacro()
+
+macro(vp_get_naoqi_version naoqi_include_path version)
+  set(${version} "0.0.0")
+  foreach(__inc ${${naoqi_include_path}})
+    set(__filename "${__inc}/alcommon/version.h")
+    if(EXISTS "${__filename}")
+      file(STRINGS ${__filename} __matches REGEX "#define NAOQI_VERSION")
+      vp_create_list_from_string(${__matches} __list)
+      list(LENGTH __list __length)
+      if(__length EQUAL 3)
+        list(REVERSE __list)
+        list(GET __list 0 ${version})
+        string(REPLACE "\"" "" ${version} ${${version}})
+        break()
+      else()
+        message("Warning: NAOQI_VERSION macro not found in ${__filename}. The following var ${version} is se
+t to 0. This may produce build issues.")
+      endif()
+    endif()
+  endforeach()
+  if(${version} VERSION_EQUAL "0.0.0")
+    message("Warning: NAOQI_VERSION macro not found in ${${naoqi_include_path}}. The following var ${version} is set to 0. This may produce build issues.")
+  endif()
+endmacro()
+
 cmake_minimum_required(VERSION 2.8.3)
+
+if(NOT NAOqi_DIR)
+  set(NAOqi_DIR "" CACHE INTERNAL "NAOqi sdk location")
+endif()
+
+#Set INCLUDE hints
+set(NAOqi_INCLUDE_HINTS
+  "$ENV{NAOqi_DIR}/include"
+  "${NAOqi_DIR}/include")
+
+# Set LIBRARY hints
+set(NAOqi_LIBRARY_HINTS
+  "$ENV{NAOqi_DIR}/lib"
+  "${NAOqi_DIR}/lib")
+
+vp_get_naoqi_version(NAOqi_INCLUDE_HINTS NAOqi_VERSION)
 
 #These are NAOqi's known components (ie. libraries)
 set(NAOqi_COMPONENTS
@@ -75,19 +124,11 @@ set(NAOqi_COMPONENTS
     alvision
     alproxies
     qi
-    qitype
 )
 
-
-#Set INCLUDE hints
-set(NAOqi_INCLUDE_HINTS
-    "${NAOqi_DIR}/include"
-    "$ENV{AL_DIR}/include" )
-
-# Set LIBRARY hints
-set(NAOqi_LIBRARY_HINTS
-    "${NAOqi_DIR}/lib"
-    "$ENV{AL_DIR}/lib" )
+if(${NAOqi_VERSION} VERSION_LESS "2.3.0")
+  list(APPEND NAOqi_COMPONENTS qitype)
+endif()
 
 # Find include directories
 find_path(NAOqi_INCLUDE_DIR alcommon/alproxy.h HINTS ${NAOqi_INCLUDE_HINTS} )
@@ -143,7 +184,7 @@ set(NAOqi_INCLUDE_DIRS ${NAOqi_INCLUDE_DIR} )
 set(NAOqi_FOUND ${NAOQI_FOUND})
 
 # If NAOqi was found, update NAOqi_DIR to show where it was found
-if ( NAOqi_FOUND )
+if(NAOqi_FOUND)
   get_filename_component(NAOqi_NEW_DIR "${NAOqi_INCLUDE_DIRS}/../" ABSOLUTE)
 endif()
 set(NAOqi_DIR ${NAOqi_NEW_DIR} CACHE FILEPATH "NAOqi root directory" FORCE)
@@ -151,5 +192,6 @@ set(NAOqi_DIR ${NAOqi_NEW_DIR} CACHE FILEPATH "NAOqi root directory" FORCE)
 #Hide these variables
 mark_as_advanced(NAOqi_INCLUDE_DIR NAOqi_LIBRARY NAOQI_FOUND)
 
-message("NAOqi Hint ${NAOqi_LIBRARY_HINTS}")
-message("NAOqi LIB ${NAOqi_LIBRARY}")
+message("NAOqi version     : ${NAOqi_VERSION}")
+message("NAOqi include dirs: ${NAOqi_INCLUDE_DIRS}")
+message("NAOqi libraries   : ${NAOqi_LIBRARIES}")
