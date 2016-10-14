@@ -401,14 +401,12 @@ void pepper_hand_pose::computeTargetCalibration()
   vpXmlParserHomogeneousMatrix p; // Create a XML parser
   std::string name_M =  "eMh_rightArm_Pepper";
   char filename[FILENAME_MAX];
-  sprintf(filename, "%s", "/tmp/eMc_pepper.xml");
+  sprintf(filename, "%s", "/tmp/eMh_pepper.xml");
 
   if (p.save(wMh, filename, name_M) != vpXmlParserHomogeneousMatrix::SEQUENCE_OK)
     std::cout << "Cannot save the Homogeneous matrix" << std::endl;
   else
     std::cout << "Homogeneous matrix saved in " << filename << std::endl;
-
-
 }
 
 
