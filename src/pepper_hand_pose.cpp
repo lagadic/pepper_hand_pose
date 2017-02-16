@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 
+
 #include <visp3/core/vpPoint.h>
 #include <visp/vpPose.h>
 #include <visp/vpPixelMeterConversion.h>
@@ -16,7 +17,7 @@
 vpDisplayX d;
 pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
   lock_(), m_cam(), m_points(), m_initPose(true), m_statusPointArray(false), m_tMe_stack(), m_hMc_stack(), m_motionProxy(NULL),
-  m_num_poses(0), m_node_init(false)
+  m_num_poses(0), m_node_init(false), m_camInfoIsInitialized(false)
 
 {
   // read in config options
@@ -28,7 +29,7 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
   m_n.param<std::string>("poseArrayName", m_poseArrayName, "/whycon/poses");
   m_n.param<std::string>("cameraInfoName", m_cameraInfoName, "/camera/camera_info");
   m_n.param<std::string>("statusPointArrayName", m_statusPointArrayName, "/whycon/status");
-  m_n.param<std::string>("poseNamePub", m_statusPointArrayName, "/whycon/status");
+  m_n.param<std::string>("poseStatusPubName", m_poseStatusPubName, "status");
   m_n.param("numPoints", m_num_points, 4);
   m_n.param("createTargetModel", m_mode_createTargeModel, false);
   m_n.param("targetCalibration", m_mode_targetCalibration, false);
@@ -43,11 +44,10 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
 
   m_3Dpoints.resize(m_num_points);
 
-  m_3Dpoints[0].setWorldCoordinates(0.02546128917, 0.006560048472, -0.001485995456   ) ;
-  m_3Dpoints[1].setWorldCoordinates( -0.00368857616, 0.00502116606, 0.008440775564   ) ;
-  m_3Dpoints[2].setWorldCoordinates( -0.01953384973, -0.00216840105, 0.0001954474102 ) ;
-  m_3Dpoints[3].setWorldCoordinates(-0.002238863281, -0.009412813483, -0.007150227518   ) ;
-
+  m_3Dpoints[0].setWorldCoordinates(0.02386628088, 0.008969775782, -0.001961696769   ) ;
+  m_3Dpoints[1].setWorldCoordinates(-0.002556501775, 0.003291224613, 0.00869612428      ) ;
+  m_3Dpoints[2].setWorldCoordinates(-0.01987060118, -0.004002836237, 0.001176433722   ) ;
+  m_3Dpoints[3].setWorldCoordinates(-0.001439177934, -0.008258164159, -0.007910861233    ) ;
 
   m_map_index.resize(m_num_points);
   m_map_index_initialized = false;
@@ -60,6 +60,9 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
   //  m_3Dpoints[3].setWorldCoordinates(-dist_point_,dist_point_,0) ;
 
   m_handPosePub = m_n.advertise<geometry_msgs::PoseStamped>(m_posePubName, 1);
+
+  m_handPoseStatusPub = m_n.advertise<std_msgs::Int8>(m_poseStatusPubName, 1);
+
   //  m_point0 = m_n.advertise<geometry_msgs::PointStamped>("/point0", 1);
   //  m_point1 = m_n.advertise<geometry_msgs::PointStamped>("/point1", 1);
   //  m_point2 = m_n.advertise<geometry_msgs::PointStamped>("/point2", 1);
@@ -68,7 +71,7 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
   if (m_mode_targetCalibration || m_mode_createTargeModel)
     m_motionProxy = new AL::ALMotionProxy(m_robotIp);
 
-  I.resize(480, 640);
+  I.resize(480, 640, 0);
   d.init(I);
   vpDisplay::setTitle(I, "ViSP viewer");
 
@@ -91,7 +94,9 @@ void pepper_hand_pose::spin()
 
     vpMouseButton::vpMouseButtonType button;
     bool ret = vpDisplay::getClick(I, button, false);
+
     this->computeHandPose();
+
     if (m_mode_targetCalibration)
     {
       if (ret && button == vpMouseButton::button1 && m_statusPointArray)
@@ -137,6 +142,8 @@ void computePose(std::vector<vpPoint> &point, const std::vector<vpImagePoint> &c
 void pepper_hand_pose::computeHandPose()
 {
   vpDisplay::display(I);
+  std_msgs::Int8 status;
+
   if ( m_camInfoIsInitialized && m_statusPointArray)
   {
     // Compute cog
@@ -201,10 +208,10 @@ void pepper_hand_pose::computeHandPose()
 
     lock_.unlock();
 
-    for(unsigned int i = 0; i< m_num_points; i++)
-    {
-      std::cout << " Index " << i <<" - " << m_map_index[i] << std::endl;
-    }
+    //    for(unsigned int i = 0; i< m_num_points; i++)
+    //    {
+    //      std::cout << " Index " << i <<" - " << m_map_index[i] << std::endl;
+    //    }
 
     //        for(unsigned int i = 0; i< m_num_points; i++)
     //        {
@@ -224,6 +231,10 @@ void pepper_hand_pose::computeHandPose()
     msg_des_pose.pose = visp_bridge::toGeometryMsgsPose(m_cMh); //convert
     m_handPosePub.publish(msg_des_pose);
 
+    //Publish status
+    status.data = 1;
+    m_handPoseStatusPub.publish(status);
+
 
     vpDisplay::displayFrame(I,m_cMh,m_cam,0.05, vpColor::none, 2);
     for(unsigned int j = 0; j<poly_vert.size();j++)
@@ -236,6 +247,11 @@ void pepper_hand_pose::computeHandPose()
     vpDisplay::displayCross(I, m_cog,10,  vpColor::cyan,2 );
     //vpDisplay::displayText(I, 30,30, "VISP", vpColor::green);
 
+  }
+  else
+  {
+    status.data = 0;
+    m_handPoseStatusPub.publish(status);
   }
   vpDisplay::flush(I);
 }

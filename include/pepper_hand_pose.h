@@ -6,6 +6,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseArray.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int8.h>
 #include <whycon/PointArray.h>
 #include <geometry_msgs/PointStamped.h>
 
@@ -72,6 +73,7 @@ protected:
   std::string m_handPosePubName;
   std::string m_poseArrayName;
   std::string m_posePubName;
+  std::string m_poseStatusPubName;
 
   ros::Subscriber m_pointArraySub;
   ros::Subscriber m_poseArraySub;
@@ -79,6 +81,7 @@ protected:
   ros::Subscriber m_cameraInfoSub;
 
   ros::Publisher m_handPosePub;
+  ros::Publisher m_handPoseStatusPub;
   ros::Publisher m_test;
   //  ros::Publisher m_point0;
   //  ros::Publisher m_point1;
