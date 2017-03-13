@@ -7,6 +7,8 @@
 * Whycon
 
 
+## Calibration Model 
+
 ## Create model target with Whycon:
 * Launch the node  
  `$ roslaunch pepper_launch hand_pose_camera_bottom_createTargetModel.launch` 
@@ -59,10 +61,58 @@ TODO: Save the coordinate in a file and load them.
 
 
   
-Compute transformation between wrist joint frame and target   
-`$ roslaunch pepper_launch hand_pose_camera_bottom_calibration_wrist_to_target.launch`   
+## Compute transformation between wrist joint frame and target  
+* Launch the node and place the hand in the field of view of the camera    
+    `$ roslaunch pepper_launch hand_pose_camera_bottom_calibration_wrist_to_target.launch`
+* Click with the left button on the Visp viewer when you want to save the transformation matrix. A file `/tmp/eMh_pepper.xml` will be created, that looks like this:
+ 
+     ```
+      <?xml version="1.0"?>
+    <root>
+      <!--This file stores homogeneous matrix used
+       in the vpHomogeneousMatrix Class of ViSP available
+       at http://www.irisa.fr/lagadic/visp/visp.html .
+       It can be read with the parse method of
+       the vpXmlParserHomogeneousMatrix class.-->
+      <!--Homogeneous Matrix-->
+      <homogeneous_transformation>
+        <!--Name of the homogeneous matrix-->
+        <name>eMh_RArm</name>
+        <values>
+          <!--Translation vector with values in meters-->
+          <tx>0.018365</tx>
+          <ty>0.027611</ty>
+          <tz>-0.007083</tz>
+          <!--Rotational vector expressed in angle axis representation with values in radians-->
+          <theta_ux>0.054571</theta_ux>
+          <theta_uy>0.030174</theta_uy>
+          <theta_uz>0.099821</theta_uz>
+        </values>
+      </homogeneous_transformation>
+    
+      <homogeneous_transformation>
+        <!--Name of the homogeneous matrix-->
+        <name>eMh_RArm_Feb_2017</name>
+        <values>
+          <!--Translation vector with values in meters-->
+          <tx>0.016631</tx>
+          <ty>0.035470</ty>
+          <tz>-0.007768</tz>
+          <!--Rotational vector expressed in angle axis representation with values in radians-->
+          <theta_ux>-0.082904</theta_ux>
+          <theta_uy>0.023592</theta_uy>
+          <theta_uz>0.039473</theta_uz>
+        </values>
+      </homogeneous_transformation>
+    </root>
+     
+     ```
+* Replace the file [/pepper_launch/data/transformation/eMh_pepper.xml](https://github.com/lagadic/pepper_launch/blob/master/data/transformation/eMh_pepper.xml) with the new one just generated.
 
-Compute pose hand:   
+
+
+# Compute hand pose:   
+
 `$ roslaunch pepper_launch hand_pose_camera_bottom.launch`
 
 

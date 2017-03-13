@@ -44,10 +44,10 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
 
   m_3Dpoints.resize(m_num_points);
 
-  m_3Dpoints[0].setWorldCoordinates(0.02386628088, 0.008969775782, -0.001961696769   ) ;
-  m_3Dpoints[1].setWorldCoordinates(-0.002556501775, 0.003291224613, 0.00869612428      ) ;
-  m_3Dpoints[2].setWorldCoordinates(-0.01987060118, -0.004002836237, 0.001176433722   ) ;
-  m_3Dpoints[3].setWorldCoordinates(-0.001439177934, -0.008258164159, -0.007910861233    ) ;
+  m_3Dpoints[0].setWorldCoordinates(0.02456575259, 0.008680920694, -0.003179369017   ) ;
+  m_3Dpoints[1].setWorldCoordinates(-0.002168673261, 0.00430616134, 0.01052246003       ) ;
+  m_3Dpoints[2].setWorldCoordinates(-0.01871024609, -0.001770263112, 0.0004129456474    ) ;
+  m_3Dpoints[3].setWorldCoordinates(-0.003686833233,-0.01121681892, -0.007756036664     ) ;
 
   m_map_index.resize(m_num_points);
   m_map_index_initialized = false;
