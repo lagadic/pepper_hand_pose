@@ -90,20 +90,6 @@ TODO: Save the coordinate in a file and load them.
         </values>
       </homogeneous_transformation>
     
-      <homogeneous_transformation>
-        <!--Name of the homogeneous matrix-->
-        <name>eMh_RArm_Feb_2017</name>
-        <values>
-          <!--Translation vector with values in meters-->
-          <tx>0.016631</tx>
-          <ty>0.035470</ty>
-          <tz>-0.007768</tz>
-          <!--Rotational vector expressed in angle axis representation with values in radians-->
-          <theta_ux>-0.082904</theta_ux>
-          <theta_uy>0.023592</theta_uy>
-          <theta_uz>0.039473</theta_uz>
-        </values>
-      </homogeneous_transformation>
     </root>
      
      ```
