@@ -57,7 +57,7 @@
 * Open the file [pepper_hand_pose.cpp](https://github.com/lagadic/pepper_hand_pose/blob/master/src/pepper_hand_pose.cpp#L47) and modify at line 47 the vector `m_3Dpoints` with your values.   
 * Save the file and compile with `catkin_make`   
 
-TODO: Save the coordinate in a file and load them.   
+TODO: Save the coordinates in a file and load them.   
 
 
   
