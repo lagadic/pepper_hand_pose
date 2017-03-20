@@ -24,12 +24,14 @@ hand_pose_camera_bottom_createTargetModel.launch
 ```
 * and remember to change   
 
-````xml
+```xml
 <param name="outer_diameter" value="0.01273"/>
 <param name="inner_diameter" value="0.00522"/>
 ```
 
-with the corresponding inner and outer diameter size of your whycon pattern.
+with the corresponding inner and outer diameter size of your whycon pattern.   
+
+TODO: Save this values in a config file and load them in each launch file.
 
 ## Calibration Model 
 
