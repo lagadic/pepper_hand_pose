@@ -10,9 +10,25 @@
 * Clone the repo in your `catkin/src`   
  `$ cd ~/catking_ws/src`   
  `$ git clone https://github.com/lagadic/pepper_hand_pose.git`   
-* Build the package:
- `$ cd ~/catkin_ws`
- `$ catkin_make -DNAOqi_DIR=/path/to/naoqi-sdk-2.5.5.5-linux64 -Dvisp_naoqi_DIR=/path/to/visp_naoqi/build-toolchain_pepper/sdk/cmake/ -Dvisp_DIR=/path_to_build_visp `
+* Build the package:   
+ `$ cd ~/catkin_ws`   
+ `$ catkin_make -DNAOqi_DIR=/path/to/naoqi-sdk-2.5.5.5-linux64 -Dvisp_naoqi_DIR=/path/to/visp_naoqi/build-toolchain_pepper/sdk/cmake/ -Dvisp_DIR=/path_to_build_visp `   
+ 
+## Customize your model
+* Open the files in the `launch` folder   
+
+```
+hand_pose_camera_bottom.launch
+hand_pose_camera_bottom_calibration_wrist_to_target.launch
+hand_pose_camera_bottom_createTargetModel.launch
+```
+* and remember to change   
+
+````xml
+<param name="outer_diameter" value="0.01273"/>
+<param name="inner_diameter" value="0.00522"/>
+```
+with the corresponding inner and outer diameter size of your whycon pattern.
 
 ## Calibration Model 
 
@@ -40,7 +56,7 @@
     0.9568784237  -0.283958137  0.06124651432  0.2019975185
     0.1155434251  0.1786029786  -0.9771132469  -0.2725745738
     0.2665204406  0.9420552254  0.2037108392  0.1178767681
-    0  0  0  1
+    0  0  0  1 
     cMo -0.6095449217  0.00102354395  0.7927508861  0.08539816923
     -0.6101983569  -0.6389838624  -0.4683554431  -0.05145413801
     0.5060757201  -0.7692189045  0.3901137474  0.2822599635
