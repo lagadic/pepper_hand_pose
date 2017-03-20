@@ -6,6 +6,13 @@
 * ViSP
 * Whycon
 
+## Installation
+* Clone the repo in your `catkin/src`   
+ `$ cd ~/catking_ws/src`   
+ `$ git clone https://github.com/lagadic/pepper_hand_pose.git`   
+* Build the package:
+ `$ cd ~/catkin_ws`
+ `$ catkin_make -DNAOqi_DIR=/path/to/naoqi-sdk-2.5.5.5-linux64 -Dvisp_naoqi_DIR=/path/to/visp_naoqi/build-toolchain_pepper/sdk/cmake/ -Dvisp_DIR=/path_to_build_visp `
 
 ## Calibration Model 
 
