@@ -1,5 +1,7 @@
 # pepper_hand_pose
 
+[![alt tag](http://img.youtube.com/vi/P_XFdi1JciE/maxresdefault.jpg)](https://youtu.be/P_XFdi1JciE)
+[Video](https://youtu.be/P_XFdi1JciE)
 
 ## Prerequisites
 * NAOqi C++ SDK
