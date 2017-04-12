@@ -12,7 +12,6 @@
 
 #include <visp3/core/vpHomogeneousMatrix.h>
 #include <visp3/core/vpMatrix.h>
-#include <visp3/core/vpQuaternionVector.h>
 #include <visp/vpXmlParserCamera.h>
 #include <visp/vpXmlParserHomogeneousMatrix.h>
 
@@ -20,7 +19,9 @@
 #include <visp_bridge/image.h>
 #include <visp_bridge/camera.h>
 
-#include <alproxies/almotionproxy.h>
+#include <qi/log.hpp>
+#include <qi/applicationsession.hpp>
+#include <qi/anyobject.hpp>
 
 
 
@@ -60,7 +61,9 @@ protected:
   // CalibrationTsai
   std::vector<vpHomogeneousMatrix> m_tMe_stack;
   std::vector<vpHomogeneousMatrix> m_hMc_stack;
-  AL::ALMotionProxy *m_motionProxy;
+  //AL::ALMotionProxy *m_motionProxy;
+  qi::SessionPtr m_session;
+  qi::AnyObject m_p_motion;
   std::string m_robotIp;
   int m_num_poses;
 

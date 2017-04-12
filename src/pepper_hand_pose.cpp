@@ -16,7 +16,7 @@
 
 vpDisplayX d;
 pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
-  lock_(), m_cam(), m_points(), m_initPose(true), m_statusPointArray(false), m_tMe_stack(), m_hMc_stack(), m_motionProxy(NULL),
+  lock_(), m_cam(), m_points(), m_initPose(true), m_statusPointArray(false), m_tMe_stack(), m_hMc_stack(),
   m_num_poses(0), m_node_init(false), m_camInfoIsInitialized(false)
 
 {
@@ -69,7 +69,13 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
   //  m_point3 = m_n.advertise<geometry_msgs::PointStamped>("/point3", 1);
 
   if (m_mode_targetCalibration || m_mode_createTargeModel)
-    m_motionProxy = new AL::ALMotionProxy(m_robotIp);
+  {
+    m_session = qi::makeSession();
+    std::string ip_port = "tcp://" + m_robotIp + ":9559";
+    m_session->connect(ip_port);
+    m_p_motion = m_session->service("ALMotion");
+
+  }
 
   I.resize(480, 640, 0);
   d.init(I);
@@ -81,10 +87,7 @@ pepper_hand_pose::pepper_hand_pose(ros::NodeHandle &nh):
 }
 
 pepper_hand_pose::~pepper_hand_pose(){
-  if (m_motionProxy != NULL) {
-    delete m_motionProxy;
-    m_motionProxy = NULL;
-  }
+
 }
 
 void pepper_hand_pose::spin()
@@ -94,16 +97,22 @@ void pepper_hand_pose::spin()
 
     vpMouseButton::vpMouseButtonType button;
     bool ret = vpDisplay::getClick(I, button, false);
+    vpDisplay::displayText(I, 30, 30, "Press right button to exit", vpColor::green);
+
 
     this->computeHandPose();
 
     if (m_mode_targetCalibration)
     {
+      vpDisplay::displayText(I, 30, 50, "Press left button to save the transformation matrix", vpColor::green);
       if (ret && button == vpMouseButton::button1 && m_statusPointArray)
         this->computeTargetCalibration();
 
       vpDisplay::flush(I);
     }
+
+    if (ret && button == vpMouseButton::button3)
+      break;
 
     ret = false;
     ros::spinOnce();
@@ -253,6 +262,13 @@ void pepper_hand_pose::computeHandPose()
     status.data = 0;
     m_handPoseStatusPub.publish(status);
   }
+
+
+  if ( m_camInfoIsInitialized)
+    ROS_DEBUG_DELAYED_THROTTLE(2, "Waiting for camera info message...");
+  if ( m_statusPointArray)
+    ROS_DEBUG_DELAYED_THROTTLE(2, "Whycon targets not detected...");
+
   vpDisplay::flush(I);
 }
 
@@ -303,7 +319,6 @@ static double distance3Dpoints (const vpPoint &iP1, const vpPoint &iP2) {
 
 void pepper_hand_pose::getPoseArrayCb(const geometry_msgs::PoseArrayConstPtr &msg)
 {
-  std::cout << "test  " << std::endl ;
 
   if (!m_map_index_initialized || !m_node_init)
     return;
@@ -332,11 +347,17 @@ void pepper_hand_pose::getPoseArrayCb(const geometry_msgs::PoseArrayConstPtr &ms
   cam_alMe_camvisp[1][0] = -1.;
   cam_alMe_camvisp[2][1] = -1.;
 
-  vpHomogeneousMatrix torsoMlcam_al(m_motionProxy->getTransform("CameraBottom", 0, true));
+  std::vector<float> test = m_p_motion.call<std::vector<float> >("getTransform","CameraBottom", 0, true );
+
+  for(unsigned int i = 0; i<test.size();i++ )
+    std::cout << test[i] << std::endl;
+   std::cout << "-------------" << std::endl;
+
+  vpHomogeneousMatrix torsoMlcam_al(m_p_motion.call<std::vector<float> >("getTransform","CameraBottom", 0, true ));
   vpHomogeneousMatrix torsoMlcam_visp = torsoMlcam_al * cam_alMe_camvisp;
   std::cout << "Torso M CameraBottom:\n" << torsoMlcam_visp << std::endl;
 
-  vpHomogeneousMatrix torsoMLWristYaw( m_motionProxy->getTransform("RWristYaw", 0, true));
+  vpHomogeneousMatrix torsoMLWristYaw( m_p_motion.call<std::vector<float> >("getTransform", "RWristYaw", 0, true ));
   std::cout << "Torso M RWristYaw:\n" << torsoMLWristYaw << std::endl;
   vpHomogeneousMatrix cMrw = torsoMlcam_visp.inverse()*torsoMLWristYaw;
   vpDisplay::displayFrame(I, cMrw, m_cam, 0.06, vpColor::none);
@@ -402,11 +423,11 @@ void pepper_hand_pose::computeTargetCalibration()
   cam_alMe_camvisp[1][0] = -1.;
   cam_alMe_camvisp[2][1] = -1.;
 
-  vpHomogeneousMatrix torsoMlcam_al(m_motionProxy->getTransform("CameraBottom", 0, true));
+  vpHomogeneousMatrix torsoMlcam_al(m_p_motion.call<std::vector<float> >("getTransform", "CameraBottom", 0, true ));
   vpHomogeneousMatrix torsoMlcam_visp = torsoMlcam_al * cam_alMe_camvisp;
   std::cout << "Torso M CameraBottom:\n" << torsoMlcam_visp << std::endl;
 
-  vpHomogeneousMatrix torsoMLWristYaw( m_motionProxy->getTransform("RWristYaw", 0, true));
+  vpHomogeneousMatrix torsoMLWristYaw( m_p_motion.call<std::vector<float> >("getTransform", "RWristYaw", 0, true ));
   std::cout << "Torso M RWristYaw:\n" << torsoMLWristYaw << std::endl;
   vpHomogeneousMatrix cMrw = torsoMlcam_visp.inverse()*torsoMLWristYaw;
   vpDisplay::displayFrame(I, cMrw, m_cam, 0.06, vpColor::none);

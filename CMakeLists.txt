@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pepper_hand_pose)
 
-# Tell CMake where to find "FindNAOqi.cmake"
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+add_definitions( -DCATKIN_BUILD )
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
@@ -10,25 +10,16 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  naoqi_libqi
+  naoqi_libqicore
   visp_bridge
   whycon
 )
 
 find_package(VISP REQUIRED)
 
+add_definitions(-DLIBQI_VERSION=${naoqi_libqi_VERSION_MAJOR}${naoqi_libqi_VERSION_MINOR})
 
-find_package(NAOqi QUIET COMPONENTS
-  alcommon
-  alvision
-  alproxies
-  alerror
-  alvalue
-  qi
-  qitype
-)
-
-# Make sure Boost.Filesystem v3 is used.
-add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 
 catkin_package(
   LIBRARIES
@@ -49,18 +40,16 @@ include_directories(include)
 
 include_directories(SYSTEM
   ${VISP_INCLUDE_DIRS}
-  ${NAOqi_INCLUDE_DIRS}
   ${whycon_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
-# Make sure Boost.Filesystem v3 is used.
-add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 
-if( NAOqi_FOUND)
-  message(STATUS "VISPNAOQIBRIDGE: NAOqi C++ SDK found; C++ nodes will be built")
-else()
-  message(STATUS "VISPNAOQIBRIDGE:Cannot find NAOqi C++ sdk; C++ nodes will NOT be built")
-endif()
+
+#if( NAOqi_FOUND)
+#  message(STATUS "VISPNAOQIBRIDGE: NAOqi C++ SDK found; C++ nodes will be built")
+#else()
+#  message(STATUS "VISPNAOQIBRIDGE:Cannot find NAOqi C++ sdk; C++ nodes will NOT be built")
+#endif()
 
 # Declare a cpp library
 add_library(pepper_hand_pose
@@ -70,19 +59,17 @@ add_library(pepper_hand_pose
 
 target_link_libraries(pepper_hand_pose
   ${catkin_LIBRARIES}
+  ${naoqi_libqi_LIBRARIES}
   ${VISP_LIBRARIES}
-  ${NAOqi_LIBRARIES}
   ${whycon_LIBRARIES}
 )
 
 ## Declare a cpp executable
-#add_executable(pepper_hand_pose_node src/pepper_hand_pose.cpp)
 add_executable(pepper_hand_pose_node src/main.cpp)
 
 target_link_libraries(pepper_hand_pose_node
   ${resource_retriever_LIBRARIES}
   ${catkin_LIBRARIES}
-  ${NAOqi_LIBRARIES}
   ${Boost_LIBRARIES}
   pepper_hand_pose
 )
